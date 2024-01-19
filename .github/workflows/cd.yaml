@@ -21,8 +21,8 @@ jobs:
 
       - name: Set Dotenv
         run: |
-          echo "MONGODB_URI=${{ secrets.MONGODB_URI }}" > .env
-          echo "OSRM_URI=${{ secrets.OSRM_URI }}" >> .env
+          "MONGODB_URI=${{ secrets.MONGODB_URI }}" | Out-File -FilePath .env -Encoding utf8
+          "OSRM_URI=${{ secrets.OSRM_URI }}" | Add-Content -Path .env -Encoding utf8
           cat .env
 
       - name: Login to DockerHub
@@ -61,5 +61,6 @@ jobs:
         run: |
           echo "MONGODB_URI=${{ secrets.MONGODB_URI }}" > .env
           echo "OSRM_URI=${{ secrets.OSRM_URI }}" >> .env
-          cat .env
+          "MONGODB_URI=${{ secrets.MONGODB_URI }}" | Out-File -FilePath .env -Encoding utf8
+          "OSRM_URI=${{ secrets.OSRM_URI }}" | Add-Content -Path .env -Encoding utf8
           docker run -d -p ${{ env.PORT }}:3000 --name ${{ env.DOCKER_CONTAINER }} --restart always ${{ env.DOCKER_IMAGE }}:latest
