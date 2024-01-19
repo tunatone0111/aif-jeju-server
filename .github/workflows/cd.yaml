@@ -37,11 +37,14 @@ jobs:
     needs: build
     runs-on: self-hosted
     steps:
-      - name: Running WAS Container
+      - name: Remove Running Container
+        run: |
+          docker stop ${{ env.DOCKER_CONTAINER }}
+          docker rm ${{ env.DOCKER_CONTAINER }}
+
+      - name: Run New Container
         run: |
           echo "MONGODB_URI=${{ secrets.MONGODB_URI }}" > .env
           echo "OSRM_URI=${{ secrets.OSRM_URI }}" >> .env
           cat .env
-          docker stop ${{ env.DOCKER_CONTAINER }} \
-          && docker rm ${{ env.DOCKER_CONTAINER }}
           docker run -d -p ${{ env.PORT }}:3000 ${{ env.DOCKER_IMAGE }}:latest
