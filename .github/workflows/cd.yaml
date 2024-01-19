@@ -53,11 +53,11 @@ jobs:
 
       - name: Remove Running Container
         run: |
-          ((docker inspect --format '{{.State.Running}}' $containerName 2>$null) -eq "True") -and (docker stop ${{ env.DOCKER_CONTAINER }}) -and (docker rm ${{ env.DOCKER_CONTAINER }})
+          ((docker inspect --format '{{.State.Running}}' ${{ env.DOCKER_CONTAINER }} 2>$null) -eq "True") -and (docker stop ${{ env.DOCKER_CONTAINER }}) -and (docker rm ${{ env.DOCKER_CONTAINER }})
 
       - name: Run New Container
         run: |
           echo "MONGODB_URI=${{ secrets.MONGODB_URI }}" > .env
           echo "OSRM_URI=${{ secrets.OSRM_URI }}" >> .env
           cat .env
-          docker run -d -p ${{ env.PORT }}:3000 ${{ env.DOCKER_IMAGE }}:latest
+          docker run -d -p ${{ env.PORT }}:3000 --name ${{ env.DOCKER_CONTAINER }} --restart always ${{ env.DOCKER_IMAGE }}:latest
