@@ -53,8 +53,7 @@ jobs:
 
       - name: Remove Running Container
         run: |
-          docker stop ${{ env.DOCKER_CONTAINER }}
-          docker rm ${{ env.DOCKER_CONTAINER }}
+          docker stop ${{ env.DOCKER_CONTAINER }} && docker rm ${{ env.DOCKER_CONTAINER }}
 
       - name: Run New Container
         run: |
