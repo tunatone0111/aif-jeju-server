@@ -6,7 +6,7 @@ on:
 
 env:
   PORT: 3000
-  DOCKER_IMAGE: 'aif-server'
+  DOCKER_IMAGE: 'tunatone0111/aif-server'
   DOCKER_CONTAINER: 'aif-server'
 
 jobs:
