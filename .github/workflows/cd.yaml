@@ -53,7 +53,7 @@ jobs:
 
       - name: Remove Running Container
         run: |
-          ((docker inspect --format '{{.State.Running}}' ${{ env.DOCKER_CONTAINER }} 2>$null) -eq "True") -and (docker stop ${{ env.DOCKER_CONTAINER }}) -and (docker rm ${{ env.DOCKER_CONTAINER }})
+          (docker stop ${{ env.DOCKER_CONTAINER }}) -and (docker rm ${{ env.DOCKER_CONTAINER }}) -or (echo "No Running Container")
 
       - name: Run New Container
         run: |
