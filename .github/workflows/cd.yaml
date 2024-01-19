@@ -8,6 +8,7 @@ env:
   PORT: 5000
   DOCKER_IMAGE: 'aif-server'
   DOCKER_CONTAINER: 'aif-server'
+  REGISTRY: 'host.docker.internal:5000'
 
 jobs:
   build:
@@ -31,7 +32,7 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: localhost:5000/${{ env.DOCKER_IMAGE }}:latest
+          tags: ${{ env.REGISTRY }}/${{ env.DOCKER_IMAGE }}:latest
 
   deploy:
     needs: build
@@ -47,4 +48,4 @@ jobs:
           echo "MONGODB_URI=${{ secrets.MONGODB_URI }}" > .env
           echo "OSRM_URI=${{ secrets.OSRM_URI }}" >> .env
           cat .env
-          docker run -d -p ${{ env.PORT }}:3000 ${{ env.DOCKER_IMAGE }}:latest
+          docker run -d -p ${{ env.PORT }}:3000 ${{ env.REGISTRY }}/${{ env.DOCKER_IMAGE }}:latest
