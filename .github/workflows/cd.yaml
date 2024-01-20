@@ -55,6 +55,7 @@ jobs:
         run: |
           (docker stop ${{ env.DOCKER_CONTAINER }})
           (docker rm ${{ env.DOCKER_CONTAINER }})
+          (docker rmi ${{ env.DOCKER_IMAGE }})
         continue-on-error: true
 
       - name: Run New Container
