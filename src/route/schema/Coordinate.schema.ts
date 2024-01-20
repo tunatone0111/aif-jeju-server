@@ -6,8 +6,4 @@ export const coordinateSchema = z.object({
   lng: z.number(),
 });
 
-export class Coordinate extends createZodDto(coordinateSchema) {
-  toString(): string {
-    return `${this.lng},${this.lat}`;
-  }
-}
+export class Coordinate extends createZodDto(coordinateSchema) {}

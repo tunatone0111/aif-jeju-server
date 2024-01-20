@@ -17,7 +17,11 @@ export class RouteService {
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
   ) {
-    this.baseUrl = this.configService.get('OSRM_URI');
+    this.baseUrl = this.configService.get<string>('OSRM_URI')!;
+  }
+
+  async getDistanceFromOffice(coord: Coordinate): Promise<number> {
+    return await this.getDistanceBetween(JEJU_OFFICE_COORD, coord);
   }
 
   async getDistanceBetween(
@@ -29,7 +33,7 @@ export class RouteService {
         routes: { distance: number }[];
       }>(
         this.baseUrl +
-          `/route/v1/driving/${start.toString()};${end.toString()}`,
+          `/route/v1/driving/${start.lng},${start.lat};${end.lng},${end.lat}`,
       ),
     );
 
@@ -46,65 +50,61 @@ export class RouteService {
         durations: number[][];
       }>(
         this.baseUrl +
-          `/table/v1/driving/${JEJU_OFFICE_COORD.toString()};${coords
-            .map((coord) => coord.toString())
-            .join(';')}`,
+          `/table/v1/driving/${JEJU_OFFICE_COORD.lng},${
+            JEJU_OFFICE_COORD.lat
+          };${coords.map((coord) => `${coord.lng},${coord.lat}`).join(';')}`,
       ),
     );
 
     return data.durations;
   }
 
-  solveTSP(distances: number[][]): number[] {
-    const numNodes = distances.length;
+  // it returns the order of the list
+  solveTSP(distanceMatrix: number[][]): number[] {
+    const n = distanceMatrix.length;
+    const dp = Array.from(Array(n), () => Array(1 << n).fill(-1));
+    const path = Array.from(Array(n), () => Array(1 << n).fill(-1));
 
-    // memo 배열 초기화
-    const memo: { distance: number; order: number[] }[][] = Array.from(
-      { length: 1 << numNodes },
-      () => Array(numNodes).fill({ distance: -1, order: [] }),
-    );
-
-    // 경로를 나타내는 비트마스크 방식 사용
-    const allNodes = (1 << numNodes) - 1;
-
-    function dp(
-      mask: number,
-      pos: number,
-    ): { distance: number; order: number[] } {
-      // 모든 노드를 방문한 경우, 출발 노드로 되돌아가는 거리 반환
-      if (mask === allNodes) {
-        return { distance: distances[pos][0], order: [0] };
+    const tsp = (cur: number, visited: number): number => {
+      if (visited === (1 << n) - 1) {
+        return 0;
       }
 
-      // 이미 계산한 값이 있다면 반환
-      if (memo[mask][pos].distance !== -1) {
-        return memo[mask][pos];
+      if (dp[cur][visited] !== -1) {
+        return dp[cur][visited];
       }
 
-      let minDistance = Infinity;
-      let bestOrder: number[] = [];
+      dp[cur][visited] = Infinity;
 
-      // 모든 노드를 순회하면서 최소 거리 찾기
-      for (let nextNode = 0; nextNode < numNodes; nextNode++) {
-        // nextNode가 이미 방문한 노드인지 확인
-        if ((mask & (1 << nextNode)) === 0) {
-          const newMask = mask | (1 << nextNode);
-          const { distance, order } = dp(newMask, nextNode);
-          const newDistance = distances[pos][nextNode] + distance;
+      for (let i = 0; i < n; i++) {
+        if (visited & (1 << i)) {
+          continue;
+        }
 
-          if (newDistance < minDistance) {
-            minDistance = newDistance;
-            bestOrder = [pos, ...order];
-          }
+        const candidate = distanceMatrix[cur][i] + tsp(i, visited | (1 << i));
+
+        if (candidate < dp[cur][visited]) {
+          dp[cur][visited] = candidate;
+          path[cur][visited] = i;
         }
       }
 
-      // 계산한 최소 거리와 방문 순서를 memo에 저장하고 반환
-      memo[mask][pos] = { distance: minDistance, order: bestOrder };
-      return memo[mask][pos];
+      return dp[cur][visited];
+    };
+
+    tsp(0, 1);
+
+    const res = [];
+    let cur = 0;
+    let visited = 1;
+
+    while (path[cur][visited] !== -1) {
+      res.push(path[cur][visited]);
+      const next = path[cur][visited];
+      visited |= 1 << next;
+      cur = next;
     }
 
-    // 시작 노드는 0으로 고정
-    return dp(1, 0).order;
+    return res;
   }
 }
