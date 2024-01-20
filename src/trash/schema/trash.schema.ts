@@ -1,13 +1,13 @@
 import { Prop, Schema, SchemaFactory, raw } from '@nestjs/mongoose';
-import { HydratedDocument } from 'mongoose';
+import { HydratedDocument, SchemaTypes, Types } from 'mongoose';
 import { TrashType } from './trashType.enum';
 
 export type TrashDocument = HydratedDocument<Trash>;
 
 @Schema()
 export class Trash {
-  @Prop({ type: String, required: true })
-  _id: string;
+  @Prop({ type: SchemaTypes.ObjectId })
+  _id: Types.ObjectId;
 
   @Prop({ type: Number })
   priority: number;

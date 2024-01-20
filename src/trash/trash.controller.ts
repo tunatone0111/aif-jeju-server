@@ -34,7 +34,7 @@ export class TrashController {
     );
 
     return res.map((i) => ({
-      id: trashList[i - 1]._id,
+      id: trashList[i - 1]._id.toString(),
       ...trashList[i - 1],
       _id: undefined,
       priority: i,
