@@ -39,7 +39,8 @@ export class TrashService {
   }
 
   getRandomTrashTypes() {
-    const number = Math.floor(Math.random() * Object.keys(TrashType).length);
+    const number =
+      Math.floor(Math.random() * (Object.keys(TrashType).length - 1)) + 1;
     return _.sampleSize(TrashType, number);
   }
 }
